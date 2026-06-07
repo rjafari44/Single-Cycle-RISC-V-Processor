@@ -1,21 +1,6 @@
 # RISC-V Single-Cycle Processor
 
-A complete single-cycle RISC-V processor implemented in Verilog. Executes one instruction per clock cycle and supports R-type, I-type, load, and store instructions. Verified against a 20-instruction test program with a perfect score of 80/80.
-
-## Architecture
-
-```
-  ┌────────────┐     ┌───────────────┐
-  │ Controller │────▶│ ALU Controller│
-  └─────┬──────┘     └───────┬───────┘
-        │ Control Signals    │ ALU_CC
-        ▼                    ▼
-  ┌─────────────────────────────────────────────┐
-  │                  Datapath                   │
-  │  PC → Inst Mem → Reg File → ALU → Data Mem  │
-  │                     ▲______________|        │
-  └─────────────────────────────────────────────┘
-```
+A complete single-cycle RISC-V processor implemented in Verilog. Executes one instruction per clock cycle and supports R-type, I-type, load, and store instructions. Verified against a 20-instruction test program with all tests passing.
 
 ## Components
 
@@ -93,21 +78,21 @@ A complete single-cycle RISC-V processor implemented in Verilog. Executes one in
 ### Design Sources
 - `processor.v` — Top-level processor
 - `controller.v` — Opcode decoder
-- `aluController.v` — ALU operation decoder
-- `dataPath.v` — Datapath integrating all execution units
-- `instMem.v` — Instruction memory
-- `regFile.v` — Register file
-- `immGen.v` — Immediate generator
-- `alu32.v` — 32-bit ALU
-- `mux32.v` — 32-bit 2:1 multiplexer
-- `dataMem.v` — Data memory
+- `alu_controller.v` — ALU operation decoder
+- `data_path.v` — Datapath integrating all execution units
+- `inst_mem.v` — Instruction memory
+- `reg_file.v` — Register file
+- `imm_gen.v` — Immediate generator
+- `alu_32.v` — 32-bit ALU
+- `mux_32.v` — 32-bit 2:1 multiplexer
+- `data_mem.v` — Data memory
 
 ### Testbench
 - `processor_tb.v` — Drives clk and reset, checks all 20 results
 
 ## Simulation
 
-Run using Vivado or any Verilog simulator. Add `tb_processor.v` as a simulation source and set it as simulation top.
+Run using Vivado or any Verilog simulator. Add `processor_tb.v` as a simulation source and set it as simulation top.
 
 ### Clock and Reset
 - 20 ns clock period (50 MHz)
@@ -143,9 +128,9 @@ PASS  cycle 20  LW      result = 0x00000030
 --------------------------------------------------
 ```
 
-## Test Result Analysis
+## Test Program Results
 
-Reset holds high from 0 to 40 ns so the processor stays idle. Once it drops, the processor begins executing one instruction per cycle. All 20 instructions pass with a score of 80/80.
+Reset holds high from 0 to 40 ns so the processor stays idle. Once it drops, the processor begins executing one instruction per cycle.
 
 | Cycle | Time | Instruction | Result |
 |-------|------|-------------|--------|
