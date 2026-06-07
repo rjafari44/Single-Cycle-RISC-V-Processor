@@ -1,24 +1,35 @@
 `timescale 1ns / 1ps
 
+// Top-level single-cycle RISC-V processor.
+// Instantiates the controller, ALU controller, and datapath, and connects
+// them with internal wires. The only external ports are the clock, reset,
+// and the 32-bit ALU result output used for verification.
+
 module processor
 (
     input clk, reset,
-    output [31:0] Result
+    output [31:0] Result  // ALU result output, used by testbench for verification
 );
 
-    // Internal wires connecting the three submodules
-    wire [6:0] opcode;   // data_path → Controller
-    wire [2:0] funct3;   // data_path → ALUController
-    wire [6:0] funct7;   // data_path → ALUController
-    wire [1:0] ALUOp;    // Controller → ALUController
-    wire [3:0] ALU_CC;   // ALUController → data_path
-    wire       ALUSrc;   // Controller → data_path
-    wire       MemtoReg; // Controller → data_path
-    wire       RegWrite; // Controller → data_path
-    wire       MemRead;  // Controller → data_path
-    wire       MemWrite; // Controller → data_path
+    // Instruction fields from datapath to control units
+    wire [6:0] opcode;   // Bits [6:0]   -- instruction type
+    wire [2:0] funct3;   // Bits [14:12] -- operation subtype
+    wire [6:0] funct7;   // Bits [31:25] -- differentiates ADD vs SUB and similar
 
-    // Controller instantiation
+    // Control signals between controller and datapath
+    wire       ALUSrc;   // Selects immediate (1) or register (0) as ALU B operand
+    wire       MemtoReg; // Selects memory data (1) or ALU result (0) for writeback
+    wire       RegWrite; // Enables write to register file
+    wire       MemRead;  // Enables data memory read
+    wire       MemWrite; // Enables data memory write
+
+    // ALUOp passes instruction class from controller to ALU controller
+    wire [1:0] ALUOp;
+
+    // ALU_CC is the 4-bit operation code from ALU controller to datapath
+    wire [3:0] ALU_CC;
+
+    // Controller decodes opcode into datapath control signals and ALUOp
     controller ctrl (
         .Opcode   (opcode),
         .ALUSrc   (ALUSrc),
@@ -29,7 +40,7 @@ module processor
         .ALUOp    (ALUOp)
     );
 
-    // ALU Controller instantiation
+    // ALU controller decodes ALUOp + Funct3 + Funct7 into the ALU operation code
     aluController alu_ctrl (
         .ALUOp     (ALUOp),
         .Funct7    (funct7),
@@ -37,7 +48,7 @@ module processor
         .Operation (ALU_CC)
     );
 
-    // Datapath instantiation
+    // Datapath executes the instruction using the control signals
     dataPath dp (
         .clk        (clk),
         .reset      (reset),
