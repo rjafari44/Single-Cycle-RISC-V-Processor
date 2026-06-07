@@ -1,6 +1,21 @@
 # RISC-V Single-Cycle Processor
 
-A complete single-cycle RISC-V processor implemented in Verilog. Executes one instruction per clock cycle and supports R-type, I-type, load, and store instructions. 
+A complete single-cycle RISC-V processor implemented in Verilog. Executes one instruction per clock cycle and supports R-type, I-type, load, and store instructions. Verified against a 20-instruction test program with a perfect score of 80/80.
+
+## Architecture
+
+```
+  ┌────────────┐     ┌───────────────┐
+  │ Controller │────▶│ ALU Controller│
+  └─────┬──────┘     └───────┬───────┘
+        │ Control Signals    │ ALU_CC
+        ▼                    ▼
+  ┌─────────────────────────────────────────────┐
+  │                  Datapath                   │
+  │  PC → Inst Mem → Reg File → ALU → Data Mem  │
+  │                     ▲______________|        │
+  └─────────────────────────────────────────────┘
+```
 
 ## Components
 
@@ -88,7 +103,7 @@ A complete single-cycle RISC-V processor implemented in Verilog. Executes one in
 - `dataMem.v` — Data memory
 
 ### Testbench
-- `tb_processor.v` — Drives clk and reset, checks all 20 results
+- `processor_tb.v` — Drives clk and reset, checks all 20 results
 
 ## Simulation
 
@@ -99,9 +114,36 @@ Run using Vivado or any Verilog simulator. Add `tb_processor.v` as a simulation 
 - Reset held high for first two cycles, then released
 
 ### Expected Output
-All 20 test cases pass with correct results.
+```
+--------------------------------------------------
+  RISC-V Single-Cycle Processor Testbench
+--------------------------------------------------
+PASS  cycle 01  AND     result = 0x00000000
+PASS  cycle 02  ADDI    result = 0x00000001
+PASS  cycle 03  ADDI    result = 0x00000002
+PASS  cycle 04  ADDI    result = 0x00000004
+PASS  cycle 05  ADDI    result = 0x00000005
+PASS  cycle 06  ADDI    result = 0x00000007
+PASS  cycle 07  ADDI    result = 0x00000008
+PASS  cycle 08  ADDI    result = 0x0000000b
+PASS  cycle 09  ADD     result = 0x00000003
+PASS  cycle 10  SUB     result = 0xfffffffe
+PASS  cycle 11  AND     result = 0x00000000
+PASS  cycle 12  OR      result = 0x00000005
+PASS  cycle 13  SLT     result = 0x00000001
+PASS  cycle 14  NOR     result = 0xfffffff4
+PASS  cycle 15  ANDI    result = 0x000004d2
+PASS  cycle 16  ORI     result = 0xfffff8d7
+PASS  cycle 17  SLTI    result = 0x00000001
+PASS  cycle 18  NORI    result = 0xfffffb2c
+PASS  cycle 19  SW      result = 0x00000030
+PASS  cycle 20  LW      result = 0x00000030
+--------------------------------------------------
+  Results: 20 / 20 passed
+--------------------------------------------------
+```
 
-## Test Program Results
+## Test Result Analysis
 
 Reset holds high from 0 to 40 ns so the processor stays idle. Once it drops, the processor begins executing one instruction per cycle. All 20 instructions pass with a score of 80/80.
 
